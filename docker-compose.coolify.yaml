@@ -70,5 +70,3 @@ volumes:
   keygen:
   postgres:
   redis:
-  caddy_data:
-  caddy_config:
