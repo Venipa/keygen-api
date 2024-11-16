@@ -40,7 +40,7 @@ services:
   web:
     image: keygen/api:latest
     ports:
-      - "3000:3000"
+      - "3000"
     networks:
       - default
       - web_network
