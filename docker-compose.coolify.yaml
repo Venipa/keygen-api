@@ -41,7 +41,7 @@ services:
     image: keygen/api:latest
     ports:
       - "3000:3000"
-    com mand: "web"
+    command: "web"
     env_file:
       - .env
     environment:
