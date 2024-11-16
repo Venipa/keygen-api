@@ -1,31 +1,12 @@
-x-common-variables: &common-variables
-  CADDY_HOSTS: ${KEYGEN_HOST}
-  POSTGRES_USER: ${POSTGRES_USER}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  POSTGRES_DB: ${POSTGRES_DB}
-  REDIS_URL: "redis://redis:6379"
-  SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-  ENCRYPTION_DETERMINISTIC_KEY: ${ENCRYPTION_DETERMINISTIC_KEY}
-  ENCRYPTION_PRIMARY_KEY: ${ENCRYPTION_PRIMARY_KEY}
-  ENCRYPTION_KEY_DERIVATION_SALT: ${ENCRYPTION_KEY_DERIVATION_SALT}
-  KEYGEN_EDITION: CE
-  KEYGEN_MODE: singleplayer
-  KEYGEN_ACCOUNT_ID: ${KEYGEN_ACCOUNT_ID}
-  KEYGEN_ADMIN_EMAIL: ${KEYGEN_ADMIN_EMAIL}
-  KEYGEN_ADMIN_PASSWORD: ${KEYGEN_ADMIN_PASSWORD}
-  KEYGEN_HOST: ${KEYGEN_HOST}
-  DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
-
 services:
   setup:
     profiles: [ "setup" ]
     image: keygen/api:latest
-    env_file:
-      - .env
     environment:
-      <<: *common-variables
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
       DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
+    env_file:
+      - .env
     command: >
       sh -c "
         until pg_isready -h postgres -U ${POSTGRES_USER}; do
@@ -40,27 +21,38 @@ services:
 
   postgres:
     image: postgres:9.6
+    ports:
+      - "127.0.0.1:5432:5432"
     environment:
-      <<: *common-variables
-      DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres:/var/lib/postgresql/data
+    networks:
+      - web_network
 
   redis:
     image: redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis:/data
+    networks:
+      - web_network
 
   web:
     image: keygen/api:latest
+    ports:
+      - "127.0.0.1:3000:3000"
     networks:
       - default
       - web_network
     command: "web"
+    env_file:
+      - .env
     environment:
-      <<: *common-variables
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
     volumes:
       - keygen:/etc/keygen
     depends_on:
@@ -73,19 +65,21 @@ services:
     env_file:
       - .env
     environment:
-      <<: *common-variables
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
     volumes:
       - keygen:/etc/keygen
     depends_on:
       - postgres
       - redis
+    networks:
+      - web_network
 
   caddy:
     image: caddy:latest
     restart: unless-stopped
     ports:
-      - "80"
-      - "443"
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
@@ -93,7 +87,6 @@ services:
     env_file:
       - .env
     environment:
-      <<: *common-variables
       CADDY_HOSTS: "${CADDY_HOSTS:-$KEYGEN_HOST}"
     command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
     depends_on:
