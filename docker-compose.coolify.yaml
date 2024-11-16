@@ -36,8 +36,6 @@ services:
 
   web:
     image: keygen/api:latest
-    ports:
-      - "3889:3000"
     command: "web"
     env_file:
       - .env
