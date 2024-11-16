@@ -1,23 +1,4 @@
 services:
-  setup:
-    profiles: [ "setup" ]
-    image: keygen/api:latest
-    environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
-      DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
-    env_file:
-      - .env
-    command: >
-      sh -c "
-        until pg_isready -h postgres -U ${POSTGRES_USER}; do
-          echo 'Waiting for PostgreSQL...'
-          sleep 1
-        done
-        bundle exec rails keygen:setup
-      "
-    depends_on: [ postgres ]
-    tty: true
-    stdin_open: true
 
   postgres:
     image: postgres:9.6
