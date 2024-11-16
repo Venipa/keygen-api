@@ -41,6 +41,9 @@ services:
     image: keygen/api:latest
     ports:
       - "${KEYGEN_WEB_PORT:-3000}:3000"
+    networks:
+      - default
+      - web_network
     command: "web"
     env_file:
       - .env
@@ -65,6 +68,30 @@ services:
       - postgres
       - redis
 
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80"
+      - "443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file:
+      - .env
+    environment:
+      CADDY_HOSTS: "${CADDY_HOSTS:-$KEYGEN_HOST}"
+    command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
+    depends_on:
+      - web
+    networks:
+      - default
+      - web_network
+
+networks:
+  web_network:
+    name: web_network
 
 volumes:
   keygen:
