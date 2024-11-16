@@ -3,7 +3,7 @@ services:
     profiles: [ "setup" ]
     image: keygen/api:latest
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
       DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
     env_file:
       - .env
@@ -22,37 +22,30 @@ services:
   postgres:
     image: postgres:9.6
     ports:
-      - "5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres:/var/lib/postgresql/data
-    networks:
-      - web_network
 
   redis:
     image: redis
     ports:
-      - "6379"
+      - "6379:6379"
     volumes:
       - redis:/data
-    networks:
-      - web_network
 
   web:
     image: keygen/api:latest
     ports:
-      - "3000"
-    networks:
-      - default
-      - web_network
-    command: "web"
+      - "3000:3000"
+    com mand: "web"
     env_file:
       - .env
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
     volumes:
       - keygen:/etc/keygen
     depends_on:
@@ -65,39 +58,13 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
     volumes:
       - keygen:/etc/keygen
     depends_on:
       - postgres
       - redis
-    networks:
-      - web_network
 
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
-    ports:
-      - "80"
-      - "443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    env_file:
-      - .env
-    environment:
-      CADDY_HOSTS: "${CADDY_HOSTS:-$KEYGEN_HOST}"
-    command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
-    depends_on:
-      - web
-    networks:
-      - default
-      - web_network
-
-networks:
-  web_network:
-    name: web_network
 
 volumes:
   keygen:
