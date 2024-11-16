@@ -3,7 +3,7 @@ services:
     profiles: [ "setup" ]
     image: keygen/api:latest
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
       DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
     env_file:
       - .env
@@ -48,7 +48,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
     volumes:
       - keygen:/etc/keygen
     depends_on:
@@ -61,7 +61,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
     volumes:
       - keygen:/etc/keygen
     depends_on:
