@@ -3,6 +3,7 @@ services:
     profiles: [ "setup" ]
     image: keygen/api:latest
     environment:
+      REDIS_URL: "redis://redis:6379"
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB}"
       DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
     env_file:
@@ -40,6 +41,7 @@ services:
     env_file:
       - .env
     environment:
+      REDIS_URL: "redis://redis:6379"
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB}"
     volumes:
       - keygen:/etc/keygen
@@ -53,6 +55,7 @@ services:
     env_file:
       - .env
     environment:
+      REDIS_URL: "redis://redis:6379"
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB}"
     volumes:
       - keygen:/etc/keygen
