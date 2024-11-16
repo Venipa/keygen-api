@@ -1,5 +1,4 @@
-x-default-environment:
-  &defaultEnv
+x-common-variables: &common-variables
   CADDY_HOSTS: ${KEYGEN_HOST}
   POSTGRES_USER: ${POSTGRES_USER}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -24,7 +23,7 @@ services:
     env_file:
       - .env
     environment:
-      <<: *defaultEnv
+      <<: *common-variables
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
       DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
     command: >
@@ -42,7 +41,7 @@ services:
   postgres:
     image: postgres:9.6
     environment:
-      <<: *defaultEnv
+      <<: *common-variables
       DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
     volumes:
       - postgres:/var/lib/postgresql/data
@@ -61,7 +60,7 @@ services:
       - web_network
     command: "web"
     environment:
-      <<: *defaultEnv
+      <<: *common-variables
     volumes:
       - keygen:/etc/keygen
     depends_on:
@@ -74,7 +73,7 @@ services:
     env_file:
       - .env
     environment:
-      <<: *defaultEnv
+      <<: *common-variables
     volumes:
       - keygen:/etc/keygen
     depends_on:
@@ -94,7 +93,7 @@ services:
     env_file:
       - .env
     environment:
-      <<: *defaultEnv
+      <<: *common-variables
       CADDY_HOSTS: "${CADDY_HOSTS:-$KEYGEN_HOST}"
     command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
     depends_on:
